@@ -1,0 +1,20 @@
+stages:
+    - deploy
+    
+deploy-image:
+    stage: deploy
+    image: docker:stable
+    before_script:
+      - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+      - eval $(ssh-agent -s)
+      - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+      - mkdir -p ~/.ssh
+      - chmod 700 ~/.ssh
+      - ssh-keyscan $PROD_SERVER_IP >> ~/.ssh/known_hosts
+      - chmod 644 ~/.ssh/known_hosts
+    script:
+      - ssh keycap@$PROD_SERVER_IP "docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY"
+      - ssh keycap@$PROD_SERVER_IP "git clone https://pet1158888:k2QjxH1H-gzqeh5Shyn4@gitlab.com/pet1158888/web.git"
+      - ssh keycap@$PROD_SERVER_IP "docker-compose -f /home/keycap/web/docker-compose.yml up -d"
+    only:
+      - master

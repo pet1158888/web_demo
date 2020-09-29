@@ -1,0 +1,49 @@
+version: '3'
+services:
+    php:
+        container_name: php_lab
+        build: 
+            context: ./php
+        ports: 
+            - "8080:80"
+        volumes: 
+            - ./www:/var/www/html
+        networks: 
+            - php_myadmin_test
+    db:
+        container_name: db_lab
+        image: mysql:5.7
+        networks: 
+            - php_myadmin_test
+        ports:
+            - 3306:3306
+        # docker run --network php_myadmin_test
+        volumes:
+            - db_data:/var/lib/mysql
+        # docker run -v db_data:/var/lib/mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: 1111
+            MYSQL_DATABASE: database
+
+        # docker run -e MYSQL_ROOT_PASSWORD=1111
+    phpmyadmin:
+        container_name: pma_lab
+        depends_on:
+            - db
+        image: phpmyadmin/phpmyadmin
+        networks:
+            - php_myadmin_test
+        restart: always
+        ports:
+            - 8888:80  
+    
+volumes:
+    db_data:
+    
+networks:
+    php_myadmin_test:
+        
+    
+         
+    
